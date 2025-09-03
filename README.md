@@ -54,3 +54,31 @@ Les colonnes disponibles varient selon les millésimes, mais on retrouve génér
 **Métadonnées:**  
 - Précision de la donnée (niveau de qualité/fiabilité de l’enregistrement)  
 
+
+<u>_Évolutions depuis 2006_</u>  
+
+**Avant 2006 :**  
+
+- Données reconstituées et moins homogènes.  
+- Beaucoup de valeurs manquantes (ex. types de végétation, causes détaillées).  
+- Formats variables selon les départements.  
+
+**Depuis 2006 :**
+
+- Standardisation nationale de la collecte.  
+- Colonnes enrichies (surface par type de végétation, causes précises).  
+- Fiabilité accrue grâce à la centralisation.
+- Export disponible en CSV (par paquets de 30 000 lignes).
+- Alignement facilité avec les référentiels INSEE/IGN (codes INSEE).  
+
+<u>_Points clés pour le projet_</u>  
+
+- Les données pré-2006 : intéressantes pour l’historique, mais nécessitent un fort nettoyage.
+
+- Les données 2006–2024 : plus complètes et adaptées pour la modélisation rapide.
+
+- Attention aux changements de codes INSEE (fusions et créations de communes, surtout après 2015).
+
+- Nécessité de concevoir un schéma SQL flexible intégrant :
+- - Les champs anciens (surface brûlée totale, date, commune).
+- - Les champs récents (détail des surfaces, causes, horaires).
