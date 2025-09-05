@@ -122,8 +122,8 @@ def main():
         sys.exit(1)
 
     files = sorted(glob.glob(DATA_GLOB))
-    print(f"🔎 Pattern : {DATA_GLOB}")
-    print(f"📄 Fichiers : {[Path(f).name for f in files]}")
+    print(f"Pattern : {DATA_GLOB}")
+    print(f"Fichiers : {[Path(f).name for f in files]}")
     if not files:
         print("Aucun fichier trouvé. Vérifie le nom (Incendies_*.csv) et le dossier data/.")
         sys.exit(1)
@@ -202,14 +202,40 @@ def main():
                 c = src(col)
                 return f"NULLIF({c}, '')"
 
-            date_src = src("date_premiere_alerte")
-            date_sql = (
-                f"CASE "
-                f"WHEN {date_src} IS NULL OR {date_src} = '' THEN NULL::timestamp "
-                f"WHEN POSITION('/' IN {date_src}) > 0 THEN to_timestamp({date_src}, 'DD/MM/YYYY HH24:MI:SS') "
-                f"ELSE ({date_src})::timestamp "
-                f"END"
+            date_src = f"COALESCE({src('date_de_premiere_alerte')}, {src('date_premiere_alerte')})"
+
+            fr_prepared = f"""
+            CASE
+            WHEN {date_src} ~ '^\\d{{2}}/\\d{{2}}/\\d{{4}} \\d{{1,2}}:\\d{{2}}$'
+                THEN {date_src} || ':00'     -- ajoute :SS si manquent
+            ELSE {date_src}
+            END
+            """
+
+            fr_padded = f"""
+            regexp_replace(
+            {fr_prepared},
+            '^(\\d{{2}}/\\d{{2}}/\\d{{4}}) (\\d):',  -- heure à 1 chiffre
+            '\\1 0\\2:'                              -- pad à 2 chiffres
             )
+            """
+
+            date_sql = f"""
+            CASE
+            WHEN {date_src} IS NULL OR {date_src} = '' THEN NULL::timestamp
+            WHEN POSITION('/' IN {date_src}) > 0 THEN
+                to_timestamp({fr_padded}, 'DD/MM/YYYY HH24:MI:SS')
+            WHEN POSITION('-' IN {date_src}) > 0 THEN
+                CASE
+                    WHEN {date_src} ~ '^\\d{{4}}-\\d{{2}}-\\d{{2}}$'
+                        THEN to_timestamp({date_src}, 'YYYY-MM-DD')
+                    WHEN {date_src} ~ '^\\d{{4}}-\\d{{2}}-\\d{{2}} \\d{{2}}:\\d{{2}}$'
+                        THEN to_timestamp({date_src}, 'YYYY-MM-DD HH24:MI')
+                    ELSE to_timestamp({date_src}, 'YYYY-MM-DD HH24:MI:SS')
+                END
+            ELSE NULL::timestamp
+            END
+            """
 
             insert_sql = f"""
                 INSERT INTO incendies (
