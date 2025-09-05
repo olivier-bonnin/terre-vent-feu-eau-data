@@ -511,4 +511,46 @@ Mettre en place des pipelines automatisés pour :
 - Télécharger et charger les fichiers bruts.
 - Normaliser les codes INSEE.
 - Ajouter les coordonnées lat/lon.
-- Documenter toutes les étapes pour assurer la reproductibilité.
+- Documenter toutes les étapes pour assurer la reproductibilité.  
+
+## Conception du schéma SQL consolidé  
+
+**Objectif**  
+
+La base SQL doit permettre de centraliser à la fois :
+- les incendies issus de la BDIFF (six fichiers CSV, en raison de la limite de 30 000 lignes par export),
+- et les communes françaises issues du référentiel INSEE (incluant les coordonnées géographiques et quelques indicateurs démographiques).
+
+Cette consolidation est essentielle pour relier chaque incendie à une commune, et pour inclure dans les analyses l’ensemble des communes, y compris celles qui n’ont jamais connu d’incendie.  
+
+**Choix de modélisation**
+
+Pour un prototype rapide et efficace, nous avons retenu une structure simple composée de deux tables principales :
+
+_Table 'communes'_
+
+- Contient toutes les communes françaises (référentiel INSEE).
+- Champs clés : code_insee (identifiant unique), nom_standard, dep_code, reg_code, population, superficie_km2, altitude_moyenne, latitude_centre, longitude_centre.
+- Ces informations permettent à la fois la cartographie (via les coordonnées), les analyses statistiques (population, superficie, densité) et le lien hiérarchique avec les départements/régions.
+
+_Table 'incendies'_
+- Contient toutes les lignes des fichiers BDIFF (un incendie = une ligne).
+- Champs clés : id_incendie (identifiant technique), annee, code_insee (référence à la commune), date_premiere_alerte, nature (origine de l’incendie), type_de_peuplement, surface_parcourue_m2 et toutes les autres surfaces détaillées, nombre_de_deces, nb_batiments_totalement_detruits, nb_batiments_partiellement_detruits.
+- Un champ de traçabilité est ajouté (src_file_name, batch_id, loaded_at) pour savoir de quel fichier chaque ligne provient.  
+
+**Principes retenus**
+
+- Complétude : toutes les colonnes des fichiers BDIFF sont conservées afin de ne perdre aucune information utile pour l’EDA et la préparation de données.
+- Granularité :
+- - incendies = une ligne par événement recensé dans la BDIFF.
+- - communes = une ligne par commune française, même sans incendie.
+
+- Clé de jointure : la relation entre les deux tables repose sur le code_insee.
+- Performance : des index sont prévus sur les colonnes fréquemment utilisées (annee, code_insee).
+- Unités : les surfaces sont stockées en m² pour rester fidèles à la source. Les conversions en hectares seront faites dans les vues ou dans les notebooks.
+- Évolutivité : la structure reste volontairement simple, mais permet d’être enrichie plus tard (ajout de données météorologiques, topographiques ou de polygones IGN).  
+
+**Avantages de ce schéma**  
+- Permet de créer un dataframe complet (commune × année) incluant les communes sans incendies.
+- Offre une base solide pour la cartographie interactive (grâce aux coordonnées géographiques) et pour la prédiction de risques (grâce aux historiques d’incendies).
+- Reste suffisamment léger et clair pour être mis en place rapidement dans le délai du projet.
