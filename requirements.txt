@@ -1,0 +1,8 @@
+pandas
+numpy
+matplotlib
+folium
+streamlit
+scikit-learn
+pyyaml
+python-dotenv

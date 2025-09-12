@@ -1,0 +1,10 @@
+﻿{
+  "recommendations": [
+    "ms-python.python",
+    "ms-toolsai.jupyter",
+    "ms-python.black-formatter",
+    "charliermarsh.ruff",
+    "ms-azuretools.vscode-docker",
+    "editorconfig.editorconfig"
+  ]
+}

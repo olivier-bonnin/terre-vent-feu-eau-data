@@ -1,0 +1,25 @@
+﻿{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "ETL BDIFF (module)",
+      "type": "python",
+      "request": "launch",
+      "module": "src.etl_bdiff",
+      "justMyCode": true,
+      "console": "integratedTerminal",
+      "args": ["--raw-dir","data/raw","--out","data/processed/bdiff_1973_2024.csv"],
+      "envFile": "${workspaceFolder}\\.env"
+    },
+    {
+      "name": "Pytest (tests/)",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "justMyCode": true,
+      "console": "integratedTerminal",
+      "args": ["-q","tests"],
+      "envFile": "${workspaceFolder}\\.env"
+    }
+  ]
+}

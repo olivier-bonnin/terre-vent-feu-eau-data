@@ -1,0 +1,9 @@
+﻿{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "format: black", "type": "shell", "command": "black src notebooks scripts", "problemMatcher": [] },
+    { "label": "lint: ruff", "type": "shell", "command": "ruff check src scripts", "problemMatcher": [] },
+    { "label": "test: pytest", "type": "shell", "command": "pytest -q tests", "problemMatcher": [] },
+    { "label": "etl: run", "type": "shell", "command": "python -m src.etl_bdiff --raw-dir data/raw --out data/processed/bdiff_1973_2024.csv", "problemMatcher": [] }
+  ]
+}
