@@ -1,26 +1,22 @@
-<<<<<<< HEAD
-/env
-=======
 # Python
 __pycache__/
 *.pyc
-venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environnements / secrets
+.venv/
 .env
-
-# VSCode
-.vscode/*.db
-.vscode/settings.json
-
-# Data
-data/raw/*
-data/interim/*
-data/processed/*.parquet
-data/processed/*.csv
-
-# Notebooks
-*.ipynb_checkpoints/
 
 # OS
 .DS_Store
 Thumbs.db
->>>>>>> 5f8a528 (Ajout structure projet + scripts + doc)
+
+# Données volumineuses (désactive si tu veux versionner des échantillons)
+# data/raw/
+# data/processed/
+
+# Rapports lourds (optionnel)
+# reports/*.html
+# reports/*.pdf
