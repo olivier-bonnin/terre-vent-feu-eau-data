@@ -96,3 +96,7 @@ Les colonnes varient selon les millésimes mais on retrouve généralement :
 - **Couverture temporelle des données : 1973–2024**  
 - **2006 = rupture méthodologique** → données fiables et standardisées  
 - Bien gérer : surfaces (m² → ha), codes INSEE, évolution des définitions (notamment 2023)
+
+---
+![Python](https://img.shields.io/badge/Python-3.13-informational) ![Streamlit](https://img.shields.io/badge/Streamlit-app-success) ![PostGIS](https://img.shields.io/badge/PostGIS-geospatial-blue)
+> Refresh: 2025-10-30 13:27
