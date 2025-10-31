@@ -1,98 +1,46 @@
-# 🌲🔥 BDIFF – Incendies de forêts en France (1973–2024)
+# BDIFF Wildfire — PostGIS + Streamlit
 
-## 🎯 Objectif du projet
-Ce projet a pour but d’analyser et de visualiser les incendies de forêts en France à partir de la **BDIFF** (Base de Données sur les Incendies de Forêts en France).  
-La base couvre la période **1973–2024** (avec homogénéisation et standardisation nationale depuis **2006**).  
-Les données sont croisées avec les référentiels INSEE et IGN pour permettre une analyse statistique et cartographique fiable.
+![Python](https://img.shields.io/badge/Python-3.13-informational)
+![Streamlit](https://img.shields.io/badge/Streamlit-app-success)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue)
+![PostGIS](https://img.shields.io/badge/PostGIS-geospatial-blue)
+![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey)
 
----
+Analyse spatio-temporelle des **incendies de forêt** (BDIFF) en région PACA, enrichie par des **features météo/NDVI** et servie via une **app Streamlit**.  
+Objectif : fournir une **lecture opérationnelle** des risques (zones, saisons, tendances), et ouvrir la voie à une **v1.5 prédictive** exploitant des modèles ML adaptés au géospatial.
 
-## 📂 Structure des données
-
-Chaque ligne du fichier BDIFF correspond à **un incendie**.  
-Les colonnes varient selon les millésimes mais on retrouve généralement :
-
-- **Identifiants et localisation**
-  - Année, Numéro, Département, Code INSEE, Nom de la commune
-- **Chronologie**
-  - Date de première alerte
-- **Surfaces brûlées (en m²)**
-  - Surface parcourue totale
-  - Détail par type : forêts, maquis/garrigues, surfaces agricoles, autres surfaces naturelles, surfaces artificialisées
-- **Caractéristiques**
-  - Type de peuplement (taillis, futaies feuillues, résineux, etc.)
-  - Nature/origine (naturelle, accidentelle, malveillance, etc.)
-- **Impacts**
-  - Décès
-  - Bâtiments détruits ou endommagés
-- **Métadonnées**
-  - Niveau de précision des surfaces (estimée / mesurée)
-  - Fiabilité de l’enregistrement
+> Projet vitrine “Data & IA appliquée à l’environnement” — stack propre, CI légère, doc claire, roadmap ambitieuse.
 
 ---
 
-## ⏳ Évolutions dans le temps
+## 1) 🎯 Objectifs
 
-- **Avant 2006**
-  - Données reconstituées, formats variables selon départements
-  - Valeurs manquantes fréquentes (type de végétation, causes…)
-  - Moins homogènes
-- **Depuis 2006**
-  - Centralisation nationale et standardisation
-  - Colonnes enrichies (surfaces par type, causes précises)
-  - Fiabilité accrue
-- **Changements 2023**
-  - Évolution de la définition des surfaces (ex. maquis/garrigues intégrés à la catégorie « forêt » en aire méditerranéenne)
+- Centraliser et normaliser les **données incendies (BDIFF)** + **exogènes** (météo, végétation NDVI).
+- Modéliser une **base PostGIS** prête pour la carto et l’analytique.
+- Construire un **pipeline ETL** reproductible (scripts `src/`).
+- Proposer une **app Streamlit** de visualisation (cartes, filtres, stats).
+- Roadmap **v1.5/v2** : features spatio-temporelles avancées et **modèles prédictifs** (classification / ranking de risque).
 
 ---
 
-## 📊 Points clés pour l’analyse
+## 2) 🌐 Sources de données
 
-- Les données **pré-2006** sont intéressantes pour l’historique, mais nécessitent un gros nettoyage.
-- Les données **2006–2024** sont fiables et adaptées à la modélisation prédictive.
-- Attention aux **changements de codes INSEE** (fusions de communes, notamment après 2015).
-- Toujours **convertir les surfaces en hectares (ha)** pour lisibilité.
-- Penser à **pondérer ou filtrer selon la précision** (estimée vs mesurée).
+- **BDIFF** (évènements feu) : géométrie, date, surface, type de végétation…
+- **Météo** (ouvertes) : températures, vent, humidité, sécheresse… (agrégations spatio-temporelles)
+- **Images satellites** (NDVI, Copernicus/Sentinel) : proxy végétation/fuel
 
----
-
-## 🗂️ Schéma SQL proposé
-
-### Table `communes`
-- `code_insee` (clé unique)
-- `nom_commune`, `dep_code`, `reg_code`
-- `population`, `superficie_km2`, `altitude_moyenne`
-- `latitude_centre`, `longitude_centre`
-
-### Table `incendies`
-- `id_incendie`, `annee`, `code_insee`
-- `date_premiere_alerte`, `nature`, `type_de_peuplement`
-- `surface_parcourue_m2` + surfaces détaillées
-- `nb_deces`, `nb_batiments_totalement_detruits`, `nb_batiments_partiellement_detruits`
-- `src_file_name`, `batch_id`, `loaded_at` (traçabilité)
+> Les scripts prévoient des *connecteurs modulaires* (CSV/GeoJSON/API). Les clés privées ne sont pas versionnées.
 
 ---
 
-## 🔗 Sources officielles
-- **BDIFF (Ministère de l’Agriculture / IGN)** : [Portail officiel](https://www.data.gouv.fr/fr/datasets/base-de-donnees-sur-les-incendies-de-forets-bdiff/)  
-- **INSEE – Code Officiel Géographique (COG)** : [INSEE COG](https://www.insee.fr/fr/information/2666684)  
-- **IGN – Admin Express** : [Admin Express](https://geoservices.ign.fr/adminexpress)  
+## 3) 🧱 Architecture technique (Vue d’ensemble)
 
----
-
-## 🚀 Utilisation du repo
-
-- `data/raw/` : fichiers CSV téléchargés depuis la BDIFF  
-- `data/interim/` : fichiers nettoyés ou préparés  
-- `data/processed/` : données finales prêtes pour analyse  
-- `notebooks/` : notebooks Jupyter (EDA, analyses, visualisations)  
-- `scripts/` : scripts Python d’ingestion/traitement des données  
-
----
-
-## ✅ A retenir
-
-- **Création officielle de la BDIFF : 2006**  
-- **Couverture temporelle des données : 1973–2024**  
-- **2006 = rupture méthodologique** → données fiables et standardisées  
-- Bien gérer : surfaces (m² → ha), codes INSEE, évolution des définitions (notamment 2023)
+```mermaid
+flowchart LR
+    A[BDIFF (raw)] --> B[ETL Python]
+    A2[Météo (raw)] --> B
+    A3[NDVI (raw)] --> B
+    B --> C[(PostgreSQL + PostGIS)]
+    C --> D[Features / Views]
+    D --> E[App Streamlit]
+    E --> U[Utilisateur (cartes/graphes/exports)]
